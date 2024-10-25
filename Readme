@@ -3,8 +3,7 @@ We need to read and parse the JSON file, extract each point (x, y), and store it
 
 Here’s the Point class to store each pair:
 
-java
-Copy code
+
 class Point {
     int x;
     int y;
@@ -16,8 +15,6 @@ class Point {
 }
 Then, we use JSON.simple library to parse the JSON file. Here’s the method to read and decode the JSON data:
 
-java
-Copy code
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -66,8 +63,6 @@ In the above code, the parseJsonInput method uses Integer.parseInt(value, base) 
 Step 3: Apply Lagrange Interpolation
 Using Lagrange interpolation, we’ll calculate the constant term of the polynomial. Here’s how we do it in Java:
 
-java
-Copy code
 public class ShamirSecretSharing {
 
     public static double lagrangeInterpolation(List<Point> points, int k) {
@@ -104,8 +99,6 @@ Output Constant Term: Print the rounded result of constantTerm.
 Final Code
 Here’s the complete code that combines parsing, decoding, and Lagrange interpolation.
 
-java
-Copy code
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
