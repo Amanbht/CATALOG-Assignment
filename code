@@ -1,80 +1,93 @@
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.FileReader;
-import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-class Point {
-    int x;
-    int y;
-
-    Point(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-}
-
 public class ShamirSecretSharing {
+    
+    // Point class to hold (x, y) coordinates
+    static class Point {
+        int x;
+        BigInteger y;
 
-    public static List<Point> parseJsonInput(String filename) {
+        Point(int x, BigInteger y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    // Method to decode the Y value from given base
+    private static BigInteger decodeValue(String value, int base) {
+        return new BigInteger(value, base);
+    }
+
+    // Method to read JSON input and parse points
+    private static List<Point> parseInput(String filePath) {
         List<Point> points = new ArrayList<>();
-        JSONParser parser = new JSONParser();
+        
+        try (FileReader reader = new FileReader(filePath)) {
+            JSONObject jsonObject = new JSONObject(new JSONTokener(reader));
+            JSONObject keys = jsonObject.getJSONObject("keys");
 
-        try (FileReader reader = new FileReader(filename)) {
-            JSONObject jsonObject = (JSONObject) parser.parse(reader);
+            int n = keys.getInt("n");
+            int k = keys.getInt("k");
 
-            JSONObject keys = (JSONObject) jsonObject.get("keys");
-            int n = Integer.parseInt(keys.get("n").toString());
-            int k = Integer.parseInt(keys.get("k").toString());
+            for (int i = 1; i <= n; i++) {
+                if (jsonObject.has(String.valueOf(i))) {
+                    JSONObject root = jsonObject.getJSONObject(String.valueOf(i));
+                    int base = root.getInt("base");
+                    String value = root.getString("value");
 
-            for (Object key : jsonObject.keySet()) {
-                if (!key.equals("keys")) {
-                    int x = Integer.parseInt((String) key);
-                    JSONObject pointData = (JSONObject) jsonObject.get(key);
-                    int base = Integer.parseInt(pointData.get("base").toString());
-                    String value = (String) pointData.get("value");
-
-                    // Decode the y value from its base to decimal
-                    int y = Integer.parseInt(value, base);
-                    points.add(new Point(x, y));
+                    BigInteger yDecoded = decodeValue(value, base);
+                    points.add(new Point(i, yDecoded));
                 }
             }
-
-        } catch (IOException | ParseException e) {
-            System.out.println("Error reading JSON file: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
+        
         return points;
     }
 
-    public static double lagrangeInterpolation(List<Point> points, int k) {
-        double constantTerm = 0.0;
+    // Method to perform Lagrange interpolation to find constant term
+    private static BigInteger findConstantTerm(List<Point> points, int k) {
+        BigInteger constantTerm = BigInteger.ZERO;
 
+        // Lagrange interpolation
         for (int i = 0; i < k; i++) {
-            double term = points.get(i).y;
+            Point pI = points.get(i);
+            BigInteger term = pI.y;
 
             for (int j = 0; j < k; j++) {
                 if (i != j) {
-                    term *= (double) -points.get(j).x / (points.get(i).x - points.get(j).x);
+                    Point pJ = points.get(j);
+
+                    // Compute term * (xj / (xj - xi))
+                    BigInteger numerator = BigInteger.valueOf(-pJ.x);
+                    BigInteger denominator = BigInteger.valueOf(pI.x - pJ.x);
+
+                    term = term.multiply(numerator).divide(denominator);
                 }
             }
-            constantTerm += term;
+
+            constantTerm = constantTerm.add(term);
         }
 
         return constantTerm;
     }
 
     public static void main(String[] args) {
-        String filename = "input.json";
-        List<Point> points = parseJsonInput(filename);
+        // Test Case 1
+        List<Point> pointsTestCase1 = parseInput("testcase1.json");
+        BigInteger constantTermTestCase1 = findConstantTerm(pointsTestCase1, 3);
+        System.out.println("Constant term for Test Case 1: " + constantTermTestCase1);
 
-        // Assuming k from the JSON input
-        int k = 3; // Replace with correct k value from JSON file
-
-        double constantTerm = lagrangeInterpolation(points, k);
-        System.out.println("Constant term (c): " + Math.round(constantTerm));
+        // Test Case 2
+        List<Point> pointsTestCase2 = parseInput("testcase2.json");
+        BigInteger constantTermTestCase2 = findConstantTerm(pointsTestCase2, 7);
+        System.out.println("Constant term for Test Case 2: " + constantTermTestCase2);
     }
 }
