@@ -1,0 +1,191 @@
+Step 1: Parse the JSON Input
+We need to read and parse the JSON file, extract each point (x, y), and store it as a list of points.
+
+Here’s the Point class to store each pair:
+
+java
+Copy code
+class Point {
+    int x;
+    int y;
+
+    Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+Then, we use JSON.simple library to parse the JSON file. Here’s the method to read and decode the JSON data:
+
+java
+Copy code
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ShamirSecretSharing {
+
+    public static List<Point> parseJsonInput(String filename) {
+        List<Point> points = new ArrayList<>();
+        JSONParser parser = new JSONParser();
+
+        try (FileReader reader = new FileReader(filename)) {
+            JSONObject jsonObject = (JSONObject) parser.parse(reader);
+
+            JSONObject keys = (JSONObject) jsonObject.get("keys");
+            int n = Integer.parseInt(keys.get("n").toString());
+            int k = Integer.parseInt(keys.get("k").toString());
+
+            for (Object key : jsonObject.keySet()) {
+                if (!key.equals("keys")) {
+                    int x = Integer.parseInt((String) key);
+                    JSONObject pointData = (JSONObject) jsonObject.get(key);
+                    int base = Integer.parseInt(pointData.get("base").toString());
+                    String value = (String) pointData.get("value");
+
+                    // Decode the y value from its base to decimal
+                    int y = Integer.parseInt(value, base);
+                    points.add(new Point(x, y));
+                }
+            }
+
+        } catch (IOException | ParseException e) {
+            System.out.println("Error reading JSON file: " + e.getMessage());
+        }
+
+        return points;
+    }
+}
+Step 2: Decode the Y Values
+In the above code, the parseJsonInput method uses Integer.parseInt(value, base) to decode each y value from its specified base to a decimal integer. This handles decoding of y values from various bases.
+
+Step 3: Apply Lagrange Interpolation
+Using Lagrange interpolation, we’ll calculate the constant term of the polynomial. Here’s how we do it in Java:
+
+java
+Copy code
+public class ShamirSecretSharing {
+
+    public static double lagrangeInterpolation(List<Point> points, int k) {
+        double constantTerm = 0.0;
+
+        for (int i = 0; i < k; i++) {
+            double term = points.get(i).y;
+
+            for (int j = 0; j < k; j++) {
+                if (i != j) {
+                    term *= (double) -points.get(j).x / (points.get(i).x - points.get(j).x);
+                }
+            }
+            constantTerm += term;
+        }
+
+        return constantTerm;
+    }
+
+    public static void main(String[] args) {
+        String filename = "input.json";
+        List<Point> points = parseJsonInput(filename);
+
+        int k = 3; // Replace with correct k value from JSON file
+
+        double constantTerm = lagrangeInterpolation(points, k);
+        System.out.println("Constant term (c): " + Math.round(constantTerm));
+    }
+}
+Explanation of Lagrange Interpolation Method
+Calculate Terms: For each point (x_i, y_i), calculate the Lagrange basis polynomial.
+Construct Polynomial: Sum all terms to construct the polynomial and find the constant term c (when evaluated at x = 0).
+Output Constant Term: Print the rounded result of constantTerm.
+Final Code
+Here’s the complete code that combines parsing, decoding, and Lagrange interpolation.
+
+java
+Copy code
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+class Point {
+    int x;
+    int y;
+
+    Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+public class ShamirSecretSharing {
+
+    public static List<Point> parseJsonInput(String filename) {
+        List<Point> points = new ArrayList<>();
+        JSONParser parser = new JSONParser();
+
+        try (FileReader reader = new FileReader(filename)) {
+            JSONObject jsonObject = (JSONObject) parser.parse(reader);
+
+            JSONObject keys = (JSONObject) jsonObject.get("keys");
+            int n = Integer.parseInt(keys.get("n").toString());
+            int k = Integer.parseInt(keys.get("k").toString());
+
+            for (Object key : jsonObject.keySet()) {
+                if (!key.equals("keys")) {
+                    int x = Integer.parseInt((String) key);
+                    JSONObject pointData = (JSONObject) jsonObject.get(key);
+                    int base = Integer.parseInt(pointData.get("base").toString());
+                    String value = (String) pointData.get("value");
+
+                    // Decode the y value from its base to decimal
+                    int y = Integer.parseInt(value, base);
+                    points.add(new Point(x, y));
+                }
+            }
+
+        } catch (IOException | ParseException e) {
+            System.out.println("Error reading JSON file: " + e.getMessage());
+        }
+
+        return points;
+    }
+
+    public static double lagrangeInterpolation(List<Point> points, int k) {
+        double constantTerm = 0.0;
+
+        for (int i = 0; i < k; i++) {
+            double term = points.get(i).y;
+
+            for (int j = 0; j < k; j++) {
+                if (i != j) {
+                    term *= (double) -points.get(j).x / (points.get(i).x - points.get(j).x);
+                }
+            }
+            constantTerm += term;
+        }
+
+        return constantTerm;
+    }
+
+    public static void main(String[] args) {
+        String filename = "input.json";
+        List<Point> points = parseJsonInput(filename);
+
+        // Assuming k from the JSON input
+        int k = 3; // Replace with correct k value from JSON file
+
+        double constantTerm = lagrangeInterpolation(points, k);
+        System.out.println("Constant term (c): " + Math.round(constantTerm));
+    }
+}
+Instructions to Run
+Place your JSON input file as input.json.
+Compile and run the Java program using an IDE or command line.
