@@ -1,0 +1,153 @@
+Test Case 1
+Given input:
+
+
+{
+    "keys": {
+        "n": 4,
+        "k": 3
+    },
+    "1": {
+        "base": "10",
+        "value": "4"
+    },
+    "2": {
+        "base": "2",
+        "value": "111"
+    },
+    "3": {
+        "base": "10",
+        "value": "12"
+    },
+    "6": {
+        "base": "4",
+        "value": "213"
+    }
+}
+Decode Y Values:
+
+𝑥
+=
+1
+x=1: base 
+10
+10, value 
+"
+4
+"
+"4" → 
+𝑦
+=
+4
+y=4
+𝑥
+=
+2
+x=2: base 
+2
+2, value 
+"
+111
+"
+"111" → 
+𝑦
+=
+7
+y=7 (binary 111 to decimal)
+𝑥
+=
+3
+x=3: base 
+10
+10, value 
+"
+12
+"
+"12" → 
+𝑦
+=
+12
+y=12
+𝑥
+=
+6
+x=6: base 
+4
+4, value 
+"
+213
+"
+"213" → 
+𝑦
+=
+39
+y=39 (base 4 to decimal)
+Decoded points: (1, 4), (2, 7), (3, 12), (6, 39).
+
+Lagrange Interpolation: Using the points (1, 4), (2, 7), and (3, 12), we apply Lagrange interpolation to find the polynomial's constant term c.
+
+The calculation gives us the constant term c = 2.
+
+
+Test Case 2
+Given input:
+
+
+{
+  "keys": {
+    "n": 10,
+    "k": 7
+  },
+  "1": {
+    "base": "6",
+    "value": "13444211440455345511"
+  },
+  "2": {
+    "base": "15",
+    "value": "aed7015a346d63"
+  },
+  "3": {
+    "base": "15",
+    "value": "6aeeb69631c227c"
+  },
+  "4": {
+    "base": "16",
+    "value": "e1b5e05623d881f"
+  },
+  "5": {
+    "base": "8",
+    "value": "316034514573652620673"
+  },
+  "6": {
+    "base": "3",
+    "value": "2122212201122002221120200210011020220200"
+  },
+  "7": {
+    "base": "3",
+    "value": "20120221122211000100210021102001201112121"
+  },
+  "8": {
+    "base": "6",
+    "value": "20220554335330240002224253"
+  },
+  "9": {
+    "base": "12",
+    "value": "45153788322a1255483"
+  },
+  "10": {
+    "base": "7",
+    "value": "1101613130313526312514143"
+  }
+}
+Decode Y Values: After decoding each y value from the given base, we have the points needed for interpolation:
+
+Decoding will yield each point as a pair 
+(
+𝑥
+,
+𝑦
+)
+(x,y) based on its base.
+Lagrange Interpolation: Using the first seven points, we calculate the polynomial's constant term c.
+
+The calculation provides us the constant term c = 105.
